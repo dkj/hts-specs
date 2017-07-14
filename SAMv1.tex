@@ -848,7 +848,7 @@ n\_cigar\_op}=1 and {\sf cigar}={\tt [k\char60\char60 4\char124{4}]}).
 This workaround is applied to BAM files \emph{only}. SAM and CRAM files are not
 affected. If tag {\tt CG} is present, BAM parsing libraries are expected to
 seamlessly update {\sf n\_cigar\_op} and {\sf cigar} with the real {\sf CIGAR}
-stored in the {\tt CG} tag.}
+stored in the {\tt CG} tag and remove the now-redundant {\tt CG} tag.}
 \stepcounter{footnote}
 \footnotetext{For backward compatibility, a {\sf QNAME} `{\tt *}' is stored as a C string {\tt "*\char92 0"}.}
 \stepcounter{footnote}
