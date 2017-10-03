@@ -7,6 +7,7 @@
 \usepackage{longtable}
 \usepackage{makecell}
 \usepackage[pdfborder={0 0 0},hyperfootnotes=false]{hyperref}
+\usepackage[title]{appendix}
 
 \makeindex
 
@@ -34,6 +35,10 @@ alignments. Header lines start with `{\tt @}', while alignment lines do
 not. Each alignment line has 11 mandatory fields for essential alignment
 information such as mapping position, and variable number of optional
 fields for flexible or aligner specific information.
+
+This specification is for version 1.5 of the SAM and BAM formats.  Each SAM and
+BAM file may optionally specify the version being used via the
+{\tt @HD VN} tag. For full version history see Appendix~\ref{sec:history}. 
 
 \subsection{An example}\label{sec:example}
 Suppose we have the following alignment with bases in lower cases
@@ -194,14 +199,28 @@ meanings can be avoided.}
     grouped by {\sf QNAME}), and {\tt reference} (alignments are grouped by
     {\sf RNAME}/{\sf POS}).\\\cline{1-3}
   \multicolumn{2}{|l}{\tt @SQ} & Reference sequence dictionary. The order of {\tt @SQ} lines defines the alignment sorting order.\\\cline{2-3}
-  & {\tt SN}* & Reference sequence name. Each {\tt @SQ} line must have a unique {\tt SN} tag. The value of this
-  field is used in the
+  & {\tt SN}* & Reference sequence name.
+The {\tt SN} tags and all individual {\tt AN} names in all {\tt @SQ} lines
+must be distinct.
+  The value of this field is used in the
   alignment records in {\sf RNAME} and {\sf RNEXT} fields. Regular expression: {\tt [!-)+-\char60\char62-\char126][!-\char126]*}\\\cline{2-3}
   & {\tt LN}* & Reference sequence length. \emph{Range}: {\tt [1,2$^{31}$-1]}\\\cline{2-3}
   & {\tt AH} & Indicates that this sequence is an alternate locus.%
 \footnote{See \url{https://www.ncbi.nlm.nih.gov/grc/help/definitions} for descriptions of \emph{alternate locus} and \emph{primary assembly}.}
   The value is the locus in the primary assembly for which this sequence is an alternative, in the format `\emph{chr}{\tt :}\emph{start}{\tt -}\emph{end}', `\emph{chr}' (if known), or `{\tt *}' (if unknown), where `\emph{chr}' is a sequence in the primary assembly.
   Must not be present on sequences in the primary assembly.\\\cline{2-3}
+  & {\tt AN} & Alternative reference sequence names.
+A comma-separated list of alternative names that tools may use when referring
+to this reference sequence.%
+\footnote{For example, given `{\tt @SQ SN:MT AN:chrMT,M,chrM LN:16569}',
+tools can ensure that a user's request for any of `MT', `chrMT', `M',
+or~`chrM' succeeds and refers to the same sequence.
+Note the restricted set of characters allowed in an alternative name.}
+These alternative names are not used elsewhere within the SAM file;
+in particular, they must not appear in alignment records' {\sf RNAME}
+or~{\sf RNEXT} fields.
+\emph{Regular expression}: \emph{name}{\tt (,}\emph{name}{\tt )*}
+where \emph{name} is {\tt [0-9A-Za-z][0-9A-Za-z*+.@\_|-]*}\\\cline{2-3}
   & {\tt AS} & Genome assembly identifier. \\\cline{2-3}
   & {\tt M5} & MD5 checksum of the sequence in the uppercase, excluding spaces but including pads (as `*'s).\\\cline{2-3}
   & {\tt SP} & Species.\\\cline{2-3}
@@ -1057,4 +1076,75 @@ int reg2bins(int beg, int end, uint16_t list[MAX_BIN])
 \end{verbatim}
 }
 
+\pagebreak
+
+\begin{appendices}
+\appendix
+\section{SAM Version History}\label{sec:history}
+
+This lists the date of each tagged SAM version along with changes that
+have been made while that version was current.  The key changes
+that caused the version number to change are shown in bold.
+
+Note the auxiliary tags have now moved to their own
+specification with its own version numbering.\footnote{
+\href{http://samtools.github.io/hts-specs/SAMtags.pdf}{http://samtools.github.io/hts-specs/SAMtags.pdf}}
+
+\subsection*{1.5: 23 May 2013 to current}
+
+\begin{itemize}
+\item Add {\tt @SQ AH} header tag. (Mar 2017)
+\item Auxiliary tags migrated to SAMtags document. (Sep 2016)
+\item Z and H auxiliary tags are permitted to be zero length. (Jun 2016)
+\item QNAME limited to 254 bytes (was 255). (Aug 2015)
+\item Generalise 0x200 flag bit as filtered-out bit. (Aug 2015)
+\item Add {\tt @HD GO} for group order. (Mar 2015)
+\item Add {\tt ONT} to the {\tt @RG PL} and {\tt @RG PM} header tags. (Mar 2015)
+\item Add meaning to reverse FLAG on unmapped reads. (Mar 2015)
+\item Document the {\tt idxstats} .bai elements. (Nov 2014)
+\item Addition of CSI index. (Sep 2014)
+\item Add {\tt MC} auxiliary tag. (Dec 2013)
+\item Add {\tt @PG DS} header field. (Dec 2013)
+\item Document the BAM EOF byte values. (Dec 2013)
+\item Glossary of alignment types. (May 2013)
+\item Add {\tt SA:Z} tag; PNEXT/RNEXT points to next read, not
+  segment.  (May 2013)
+\item \textbf{Add SUPPLEMENTARY flag bit}. (May 2013)
+\end{itemize}
+
+\subsection*{1.4: 21 April 2011 to May 2013}
+
+\begin{itemize}
+\item Add guide to using sequence annotations ({\tt CT/PT tags}). (Mar 2012)
+\item Increase max reference length from $2^{29}$ to $2^{31}$. (Sep
+  2011)
+\item Add {\tt CO} and {\tt RT} auxiliary tags. (Sep 2011)
+\item Clarify {\tt @SQ M5} header tag generation. (Sep 2011)
+\item Describe padded alignments and add {\tt CT/PT tags}. (Sep 2011)
+\item Add {\tt BC} barcode auxiliary tag. (Sep 2011)
+\item Change {\tt FZ} tag from type {\tt H} to type {\tt B,S}. (Aug 2011)
+\item Add {\tt @RG FO}, {\tt KS} header fields. (Apr 2011)
+\item Add {\tt FZ} auxiliary tag. (Apr 2011)
+\item Clarify chaining of PG records. (Apr 2011)
+\item \textbf{Add {\tt B} array auxiliary tag type.} (Apr 2011)\
+\item \textbf{Permit IUPAC in SEQ and {\tt MD} auxiliary tag.} (Apr 2011)
+\item \textbf{Permit QNAME ``{\tt *}''.} (Apr 2011)
+\end{itemize}
+
+\subsection*{1.3: July 2010 to April 2011}
+
+\begin{itemize}
+\item Re-add {\tt CC} and {\tt CP} auxiliary tags. (Mar 2011)
+\item Add CIGAR N intron/skip operator. (Dec 2010)
+\item Add {\tt BQ} BAQ tag. (Nov 2010)
+\item Add {\tt RG PG} header field. (Nov 2010)
+\item Add BAM description and index sections. (Nov 2010)
+\item \textbf{Removal of FLAG letters.} (July 2010)
+\end{itemize}
+
+\subsection*{1.0: 2009 to July 2010}
+
+Initial edition.
+
+\end{appendices}
 \end{document}
