@@ -860,10 +860,12 @@ should be written as zero and ignored on reading by current software.}
 \footnotetext{With 16 bits, {\sf n\_cigar\_op} can keep at most 65535 {\sf
 CIGAR} operations in BAM files. For an alignment with more {\sf CIGAR}
 operations, BAM stores the real {\sf CIGAR}, in its binary form, to the {\tt
-CG} optional tag of type `{\tt B,I}', and sets the {\sf CIGAR} to `{\tt kS}' as
-a placeholder, where `{\tt k}' is the length of {\sf SEQ} and `{\tt S}' the
-soft-clipping {\sf CIGAR} operator (i.e. in the binary form, {\sf
-n\_cigar\_op}=1 and {\sf cigar}={\tt [k\char60\char60 4\char124{4}]}).
+CG} optional tag of type `{\tt B,I}', and sets the {\sf CIGAR} to `{\tt kSmN}'
+as a placeholder, where `{\tt k}' is the length of {\sf SEQ}, `{\tt S}' the
+soft-clipping {\sf CIGAR} operator, `{\tt m}' is the length of the alignment on
+the reference, and `{\tt N}' the skipped reference {\sf CIGAR} operator (i.e.
+in the binary form, {\sf n\_cigar\_op}=2 and {\sf cigar}={\tt [k\char60\char60
+4\char124{4}, m\char60\char60 4\char124{3}]}).
 This workaround is applied to BAM files \emph{only}. SAM and CRAM files are not
 affected. If tag {\tt CG} is present, BAM parsing libraries are expected to
 seamlessly update {\sf n\_cigar\_op} and {\sf cigar} with the real {\sf CIGAR}
